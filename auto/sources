@@ -176,6 +176,11 @@ UNIX_SRCS="$CORE_SRCS $EVENT_SRCS \
             src/os/unix/ngx_dlopen.c \
             src/os/unix/ngx_process_cycle.c"
 
+if [ "$NGX_PLATFORM" = android-arm ]; then
+    UNIX_SRCS="$UNIX_SRCS \
+                src/core/glob.c"
+fi;
+
 POSIX_DEPS=src/os/unix/ngx_posix_config.h
 
 THREAD_POOL_MODULE=ngx_thread_pool_module

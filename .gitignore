@@ -1,0 +1,6 @@
+.*.swp
+crtbegin_dynamic.o
+crtend_android.o
+objs/src/*
+objs/*.o
+objs/nginx*

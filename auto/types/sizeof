@@ -40,7 +40,14 @@ eval "$ngx_test >> $NGX_AUTOCONF_ERR 2>&1"
 
 
 if [ -x $NGX_AUTOTEST ]; then
-    ngx_size=`$NGX_AUTOTEST`
+    if [ "$NGX_PLATFORM" = android-arm ]; then
+        (adb root && adb wait-for-device && adb remount && adb wait-for-device) > /dev/null
+	(adb push $NGX_AUTOTEST /system/xbin/) 1> /dev/null 2>/dev/null
+	NGX_AUTOTEST_BASENAME=`basename $NGX_AUTOTEST`
+        ngx_size=`adb shell /system/xbin/$NGX_AUTOTEST_BASENAME`
+    else
+        ngx_size=`$NGX_AUTOTEST`
+    fi
     echo " $ngx_size bytes"
 fi
 
