@@ -7,7 +7,14 @@ if [ "$NGX_PLATFORM" != win32 ]; then
 
     ngx_feature="C compiler"
     ngx_feature_name=
-    ngx_feature_run=yes
+
+    # android-arm platform is cross compiled, we cannot run
+    if [ "$NGX_PLATFORM" != android-arm ]; then
+        ngx_feature_run=yes
+    else
+        ngx_feature_run=no
+    fi
+
     ngx_feature_incs=
     ngx_feature_path=
     ngx_feature_libs=

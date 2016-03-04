@@ -46,6 +46,21 @@ ngx_feature_inc_path=
 
 eval "/bin/sh -c \"$ngx_test\" >> $NGX_AUTOCONF_ERR 2>&1"
 
+exec_autotest()
+{
+    if [ "$NGX_PLATFORM" != android-arm ]; then
+        /bin/sh -c $NGX_AUTOTEST >> $NGX_AUTOCONF_ERR 2>&1
+        return $?
+    else
+        (adb root && adb wait-for-device && adb remount && adb wait-for-device) > /dev/null
+	(adb push $NGX_AUTOTEST /system/xbin/) 1> /dev/null 2>/dev/null
+	NGX_AUTOTEST_BASENAME=`basename $NGX_AUTOTEST`
+	## adb shell "/system/xbin/$NGX_AUTOTEST_BASENAME \|\| echo __ADB_FAIL__ > /data/local/tmp/rc"
+	## echo -n "content of /data/local/tmp/rc: "; adb shell cat /data/local/tmp/rc
+	adb shell /system/xbin/$NGX_AUTOTEST_BASENAME | tee -a $NGX_AUTOCONF_ERR 2>&1
+	return 0
+    fi
+}
 
 if [ -x $NGX_AUTOTEST ]; then
 
@@ -53,7 +68,7 @@ if [ -x $NGX_AUTOTEST ]; then
 
         yes)
             # /bin/sh is used to intercept "Killed" or "Abort trap" messages
-            if /bin/sh -c $NGX_AUTOTEST >> $NGX_AUTOCONF_ERR 2>&1; then
+            if exec_autotest; then
                 echo " found"
                 ngx_found=yes
 
@@ -68,14 +83,14 @@ if [ -x $NGX_AUTOTEST ]; then
 
         value)
             # /bin/sh is used to intercept "Killed" or "Abort trap" messages
-            if /bin/sh -c $NGX_AUTOTEST >> $NGX_AUTOCONF_ERR 2>&1; then
+            if exec_autotest; then
                 echo " found"
                 ngx_found=yes
 
                 cat << END >> $NGX_AUTO_CONFIG_H
 
 #ifndef $ngx_feature_name
-#define $ngx_feature_name  `$NGX_AUTOTEST`
+#define $ngx_feature_name  `exec_autotest`
 #endif
 
 END
@@ -86,7 +101,7 @@ END
 
         bug)
             # /bin/sh is used to intercept "Killed" or "Abort trap" messages
-            if /bin/sh -c $NGX_AUTOTEST >> $NGX_AUTOCONF_ERR 2>&1; then
+            if exec_autotest; then
                 echo " not found"
 
             else

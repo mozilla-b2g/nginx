@@ -1,0 +1,11 @@
+Updating nginx build/new device
+===============================
+ - you need a device with the same system already running, plugged, and with
+   |adb root| working
+ - run: CCACHE_DISABLE=1 BOOTSTRAP_NGINX=true ./build.sh -j1 showcommands nginx
+ - this should produce a new config set in external/nginx/objs/
+ - adjust the list of objects from external/nginx/objs/Makefile:
+   - objs/[...].o should be src/[...].c
+   - except objs/ngx_modules.o which stays objs/ngx_modules.c
+   - make sure includes and linking are good
+ - commit the new config
